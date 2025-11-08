@@ -1,5 +1,9 @@
 syntax  = "proto3";
 
+package proto;
+
+option go_package = "lec-07-prg-01-hello_grpc/proto";
+
 service MyService {
     rpc MyFunction(MyNumber) returns (MyNumber) {}
 }
