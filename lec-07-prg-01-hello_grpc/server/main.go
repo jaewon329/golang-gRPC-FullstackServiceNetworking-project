@@ -5,9 +5,9 @@ import (
 	//요청 과정에서의 신호
 	"context"
 	//로깅
-	_ "log"
+	"log"
 	//네트워크 기능 도구
-	_ "net"
+	"net"
 
 	//grpc모듈 import
 	_ "google.golang.org/grpc"
@@ -33,7 +33,15 @@ func (s *MyServiceServer) MyFunction(ctx context.Context, MyNumber *pb.MyNumber)
 	return &pb.MyNumber{Value: int32(response)}, nil
 }
 
+// 포트 넘버 설정
+const portNumber = "[::]:50051"
+
 // main함수 (grpc서버 생성 및 등록/ 서버 실행 및 유지)
 func main() {
-
+	//서버에 전달할 tcp리스너 생성 : 파이썬에서는 add_insecure_port()를 호출하면 내부적으로 자동 처리 했었음
+	s, err := net.Listen("tcp", portNumber)
+	if err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to listen: %v", err)
+	}
 }
