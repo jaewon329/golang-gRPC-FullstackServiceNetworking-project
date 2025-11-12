@@ -10,7 +10,7 @@ import (
 	"net"
 
 	//grpc모듈 import
-	_ "google.golang.org/grpc"
+	"google.golang.org/grpc"
 
 	//원격 호출될 함수 import
 	"lec-07-prg-01-hello_grpc/server/function"
@@ -43,5 +43,18 @@ func main() {
 	if err != nil {
 		//에러시 err내용을 출력하고 프로그램 즉시 종료
 		log.Fatalf("failed to listen: %v", err)
+	}
+
+	//grpc서버 생성
+	grpcServer := grpc.NewServer()
+	//위에서 생성한 클라이언트로 부터 값을 받아 My_func를 실행해 결과를 돌려주는 MyServiceServer함수를 grpc서버에 등록
+	pb.RegisterMyServiceServer(grpcServer, &MyServiceServer{})
+	//grpc서버 실행
+	//Serve()를 사용해서 앞서 생성한 리스너를 grpc서버로 전달해주며 동시성 처리
+	//thread pool을 지정해 줬던 파이썬과 달리 go에서는 고루틴으로 연결마다 내부적으로 새 고루틴 생성해 동시성 처리
+	log.Println("Starting server. Listening on port 50051.")
+	if err := grpcServer.Serve(s); err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to server: %v", err)
 	}
 }
