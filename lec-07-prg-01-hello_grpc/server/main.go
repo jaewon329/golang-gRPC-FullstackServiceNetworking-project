@@ -50,8 +50,8 @@ func main() {
 	//위에서 생성한 클라이언트로 부터 값을 받아 My_func를 실행해 결과를 돌려주는 MyServiceServer함수를 grpc서버에 등록
 	pb.RegisterMyServiceServer(grpcServer, &MyServiceServer{})
 	//grpc서버 실행
-	//Serve()를 사용해서 앞서 생성한 리스너를 grpc서버로 전달해주며 동시성 처리
-	//thread pool을 지정해 줬던 파이썬과 달리 go에서는 고루틴으로 연결마다 내부적으로 새 고루틴 생성해 동시성 처리
+	//Serve()를 사용해서 앞서 생성한 리스너를 grpc서버로 전달해줌, 또한 Serve()에서 동시성 처리
+	//thread pool을 지정해 줬던 파이썬과 달리 go에서는 고루틴으로 연결마다 내부적으로 새 고루틴 생성해 동시성 처리를 한다
 	log.Println("Starting server. Listening on port 50051.")
 	if err := grpcServer.Serve(s); err != nil {
 		//에러시 err내용을 출력하고 프로그램 즉시 종료
