@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 
 	//grpc모듈 import
 	"google.golang.org/grpc"
@@ -19,7 +20,7 @@ type ServerStreamingServer struct {
 
 // proto 파일내 정의한 rpc함수 이름에 대응하는 GetServerResponse함수
 // 자동생성 파일 serverstreaming_grpc.pb.go의 type ServerStreamingServer interface를 참고한다.
-func (s *ServerStreamingService) GetServerResponse(request *pb.Number, stream grpc.ServerStreamingServer[pb.Message]) error {
+func (s *ServerStreamingServer) GetServerResponse(request *pb.Number, stream grpc.ServerStreamingServer[pb.Message]) error {
 	//클라이언트에서 결정한 스트리밍의 수를 가져온다.
 	req_Count := request.GetValue()
 
@@ -47,4 +48,28 @@ func (s *ServerStreamingService) GetServerResponse(request *pb.Number, stream gr
 }
 
 // 포트 넘버 설정
+const portNumber = "[::]:50051"
+
 // main함수 (grpc서버 생성 및 등록/서버 실행 및 유지)
+// hello_grpc 때랑 거의 유사하다.
+func main() {
+	//서버에 전달할 tcp리스너 생성 : 파이썬에서는 add_insecure_port()를 호출하면 내부적으로 자동 처리 했었음.
+	s, err := net.Listen("tcp", portNumber)
+	if err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	//grpc서버 생성
+	grpcServer := grpc.NewServer()
+	//위에서 생성한 Streaming을 진행하는 ServerStreamingServer함수를 grpc서버에 등록
+	pb.RegisterServerStreamingServer(grpcServer, &ServerStreamingServer{})
+	//grpc서버 실행
+	//Serve()를 사용해서 앞서 생성한 리스너를 grpc서버로 전달해줌, 또한 Serve()에서 동시성 처리
+	//thread pool을 지정해 줬던 파이썬과 달리 go에서는 고루틴으로 연결마다 내부적으로 새 고루틴 생성해 동시성 처리를 한다
+	log.Println("Starting server. Listening on port 50051.")
+	if err := grpcServer.Serve(s); err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to server: %v", err)
+	}
+}
