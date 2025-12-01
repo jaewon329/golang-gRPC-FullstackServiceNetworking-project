@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "lec-07-prg-03-clientstreaming/proto";
+
+service ClientStreaming {
+    //A Client streaming RPC.
+    rpc GetServerResponse(stream Message) returns (Number) {}
+}
+
+message Message {
+    string message = 1;
+}
+
+message Number {
+    int32 value = 1;
+}
