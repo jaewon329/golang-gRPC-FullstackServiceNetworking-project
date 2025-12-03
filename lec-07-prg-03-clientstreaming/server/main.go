@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"log"
+	"net"
 
 	//grpc모듈 import
 	"google.golang.org/grpc"
@@ -46,5 +47,27 @@ func (s *ClientStreamingServer) GetServerResponse(stream grpc.ClientStreamingSer
 }
 
 // 포트 넘버 설정
+const portNumber = "[::]:50051"
 
-//main함수 (gpc서버 생성 및 등록/서버 실행 및 유지)
+// main함수 (gpc서버 생성 및 등록/서버 실행 및 유지)
+// gRPC서버 등록하고 serve하는 코드이기 때문에 앞서 만든 server의 main.go코드와 거의 똑같다.
+func main() {
+	//서버에 전달할 tcp리스너 생성
+	s, err := net.Listen("tcp", portNumber)
+	if err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	//grpc서버 생성
+	grpcServer := grpc.NewServer()
+	//위에서 생성한 클라이언트의 정보를 받아 count를 증가시키는 ClientStreamingServer함수를 grpc서버에 등록
+	pb.RegisterClientStreamingServer(grpcServer, &ClientStreamingServer{})
+
+	//Serve()를 이용해 grpc서버 실행
+	log.Println("Starting server. Listening on port 50051.")
+	if err := grpcServer.Serve(s); err != nil {
+		//에러시 err내용을 출력하고 프로그램 즉시 종료
+		log.Fatalf("failed to serve: %v", err)
+	}
+}
