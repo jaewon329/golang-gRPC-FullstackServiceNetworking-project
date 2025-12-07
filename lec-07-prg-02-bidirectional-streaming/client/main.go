@@ -48,7 +48,7 @@ func send_message(stub pb.BidirectionalClient) {
 			//스트림 연결에서 Recv를 통해 응답을 받아온다
 			response, err := responses.Recv()
 			//만약 서버가 다 보냈음을 확인하면 채널을 종료한다.
-			// -> send_message 최종 종료 시점
+			// -> send_message 최종 종료 시점 무한 루프를 종료하고 go func() 작업이 끝난다.
 			if err == io.EOF {
 				close(wait_to_receive)
 				return
